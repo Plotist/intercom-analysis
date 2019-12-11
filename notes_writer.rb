@@ -2,11 +2,12 @@ require "./rate_control"
 
 class NotesWriter
 
-  def initialize(intercom, conversation_ids, pattern, skip_pattern_for)
+  def initialize(intercom, conversation_ids, pattern, skip_pattern_for, since)
     @intercom = intercom
     @conversation_ids = conversation_ids
     @pattern = pattern
     @skip_pattern_for = skip_pattern_for
+    @since = since
   end
 
   def write(to_file_name)
@@ -35,7 +36,9 @@ class NotesWriter
           end
 
           notes = []
-          conversation.conversation_parts.each{ |cp| compose_note_object(notes, cp, conversation, country_name, user_email)}
+          conversation.conversation_parts.each do |cp|
+            compose_note_object(notes, cp, conversation, country_name, user_email)
+          end
           notes.each do |note|
             yield file, note
           end
@@ -54,8 +57,9 @@ class NotesWriter
   end
 
   def note_satisfiable?(conversation_part)
-    (conversation_part.part_type === "note" && conversation_part.body.downcase.match(@pattern)) ||
-        (conversation_part.part_type === "note" && conversation_part.author.id === @skip_pattern_for[:id])
+    (conversation_part.created_at.to_i < @since) &&
+    ((conversation_part.part_type === "note" && conversation_part.body.downcase.match(@pattern)) ||
+        (conversation_part.part_type === "note" && conversation_part.author.id === @skip_pattern_for[:id]))
   end
 
   def conversation_satisfiable?(conv)
