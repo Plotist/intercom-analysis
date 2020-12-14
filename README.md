@@ -1,5 +1,5 @@
 # intercom-analysis
-Simple ruby interface for extraction of intercom conversation notes
+Ruby interface for extraction and categorization of intercom conversation notes and related metadata
 
 Example script 
 
